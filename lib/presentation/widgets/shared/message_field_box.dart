@@ -1,55 +1,44 @@
 import 'package:flutter/material.dart';
 
 class MessageFieldBox extends StatelessWidget {
-  const MessageFieldBox({Key? key}) : super(key: key);
+  const MessageFieldBox({super.key});
 
   @override
   Widget build(BuildContext context) {
-    //necesito tomar el input del usuario para mostrar en consola
     final textController = TextEditingController();
+    final focusNode = FocusNode();
 
-    final colors = Theme.of(context).colorScheme;
+    final outlineInputBorder = UnderlineInputBorder(
+        borderSide: const BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(40));
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.secondary,
-        borderRadius: BorderRadius.circular(20.0),
+    final inputDecoration = InputDecoration(
+      hintText: 'End your message with a "?"',
+      enabledBorder: outlineInputBorder,
+      focusedBorder: outlineInputBorder,
+      filled: true,
+      suffixIcon: IconButton(
+        icon: const Icon(Icons.send_outlined),
+        onPressed: () {
+          final textValue = textController.value.text;
+          print('button: $textValue');
+          textController.clear();
+        },
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: textController,
-                decoration: InputDecoration(
-                  hintText: 'Type a message, end with "??"',
-                  hintStyle: TextStyle(
-                    color: colors.onSecondary,
-                  ),
-                  border: InputBorder.none,
-                ),
-                
-                onFieldSubmitted: (value) {
-                  print('submitted: $value');
-                  textController.clear();
-                },
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                 print("send message");
-                 print('texto from textController: $textController.text');
-                 textController.clear();
-              },
-              icon: Icon(
-                Icons.send,
-                color: colors.onSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
+    );
+
+    return TextFormField(
+      onTapOutside: (event) {
+        focusNode.unfocus();
+      },
+      focusNode: focusNode,
+      controller: textController,
+      decoration: inputDecoration,
+      onFieldSubmitted: (value) {
+        print('Submit value $value');
+        textController.clear();
+        focusNode.requestFocus();
+      },
     );
   }
 }
