@@ -1,7 +1,10 @@
+import 'package:another_yes_no_flutter_application/domain/entities/message.dart';
 import 'package:another_yes_no_flutter_application/presentation/widgets/chat/my_message_bubble.dart';
 import 'package:another_yes_no_flutter_application/presentation/widgets/shared/message_field_box.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../providers/chat_provider.dart';
 import '../../widgets/chat/her_message_bubble.dart';
  
 // create the ChatScreen Widget as StatelessWidget
@@ -33,6 +36,13 @@ class _ChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // I will listen to the ChatProvider to get the messages
+    // and display them in the ListView.builder
+    final chatProvider = context.watch<ChatProvider>();
+
+    var myCustomScrollController = chatProvider.chatScrollController;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -40,15 +50,21 @@ class _ChatView extends StatelessWidget {
           children: [
             Expanded(
               child: ListView.builder(
-                itemCount: 100,
+                controller: myCustomScrollController,
+                itemCount: chatProvider.messageList.length,
                 itemBuilder: (context, index) {
-                 return (index % 2 == 0) 
-                 ? HerMessageBubble()
-                 : MyMessageBubble();
+                    final message = chatProvider.messageList[index];
+                 return ( message.fromWho == FromWho.hers) 
+                 ? HerMessageBubble(message: message)
+                 : MyMessageBubble(message: message);
                 },
               ),
              ),
-             MessageFieldBox(),            
+             MessageFieldBox(
+                onValue: (value) {
+                  chatProvider.sendMessage(value);                
+                },
+             ),            
           ],
         ),
       ),
